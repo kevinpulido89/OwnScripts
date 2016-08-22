@@ -1,0 +1,78 @@
+<html>
+  <head>
+	<script type="text/javascript" src="eon.js"></script>
+	<link type="text/css" rel="stylesheet" href="eon.css" />
+
+    <style>
+      .c3-region-1 {
+        fill: #dd3333;
+        fill-opacity: 0.8
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <h1 align="center">Temperature Readings5</h1>
+	
+	<script type="text/javascript">
+		var __eon_pubnub = PUBNUB.init({
+		  subscribe_key: "sub-c-12b25da4-5597-11e6-a5a4-0619f8945a4f"
+		});
+		var __eon_cols = ["Humedad","Temperatura"]; 
+		var __eon_labels = {}; 
+		chart = eon.chart({
+		  pubnub: __eon_pubnub,
+		  channel: "temp_humid",
+		  history: true,
+		  flow: true,
+		  rate: 876,
+		  limit: 23,
+		  generate: {
+			bindto: "#chart",
+			data: {
+			  colors: {"Humedad":"#1a17c4","Temperatura":"#bd301b"},
+			  type: "area-spline"
+			},
+			transition: {
+			  duration: 250
+			},
+			axis: {
+			  x: {
+				label: "TimeStamp"
+			  },
+			  y: {
+				label: "Values"
+			  }
+			},
+			grid: {
+			  x: {
+				show: false 
+			  },
+			  y: {
+				show: true 
+			  }
+			},
+			tooltip: {
+			 show: true
+			},
+			point: {
+			  show: true
+			}
+		  },
+		  transform: function(message) {
+			var message = eon.c.flatten(message.eon);
+			var o = {};
+			for(index in message) {
+			  if(__eon_cols.indexOf(index) > -1){
+				o[__eon_labels[index] || index] = message[index];
+			  }
+			}
+			return {
+			  eon: o
+			};
+		  }
+		});
+	</script>
+
+  </body>
+</html>

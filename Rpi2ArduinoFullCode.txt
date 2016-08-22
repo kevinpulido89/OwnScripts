@@ -1,0 +1,114 @@
+//https://www.raspberrypi.org/forums/viewtopic.php?f=91&t=148056&p=974173
+#include <Wire.h>
+
+byte number = 0;
+int state = 0;
+void setup() {
+
+  Serial.begin(9600); // start serial for output
+  while (!Serial)
+    
+  // initialize i2c as slave
+  Wire.begin(0x12);
+
+  // define callbacks for i2c communication
+  Wire.onReceive(receiveData);
+  Wire.onRequest(sendData);
+  Serial.println("Ready!");
+}
+
+void loop() {
+  delay(50);
+}
+
+// callback for received data
+void receiveData(int byteCount) {
+
+  while (Wire.available()) {
+    number = Wire.read();
+    //Serial.print("Data received: ");
+    Serial.println(number);
+
+    if (number == 10) {
+      if (state == 0) {
+        digitalWrite(13, HIGH); // set the LED on
+        state = 1;
+      }
+      else {
+        digitalWrite(13, LOW); // set the LED off
+        state = 0;
+      }
+    }
+  }
+  Serial.println("Done!");
+}
+
+// callback for sending data
+void sendData() {
+  int data = SensorRead();
+  byte x = data % 256;
+  byte y = data / 256;
+  byte z[] = {x, y};
+  int i = number;
+  Wire.write(z[i]);
+  Serial.print("Data sent: ");
+  Serial.println(z[i]);
+}
+
+int SensorRead() {
+  int sensorValue = analogRead(A1);
+  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
+  int voltage = sensorValue * (5 / 10.23);
+  return voltage;
+}
+_________________________________________________________________________________
+
+import smbus
+import time
+bus = smbus.SMBus(1)
+
+# This is the address we setup in the Arduino Program
+address = 0x12
+d=0
+
+# Definicion de funciones
+def writeNumber(x,y):
+        value = [];
+        value.append(x);
+        value.append(y);
+        bus.write_block_data(address, 0, value)
+        return -1
+
+def readI2Cdata(n):
+        i=0
+        a=[]
+        while i<n:
+            x=bus.read_byte_data(address,i)
+            a.insert(i,x)
+            i +=1
+        return (a)
+
+# Script que usa las funciones definidas
+#var1 = int(input("Enter number : "))
+#var2 = int(input("Enter number : "))
+#writeNumber(var1,var2)
+#print ('RPI: Hi Arduino, I sent you ' + str(var1)+ " & " + str(var2))
+
+# sleep one second
+#time.sleep(1)
+
+while d<=12:
+        array = readI2Cdata(3)
+
+        k = (array[0] + array[1]*256)/100
+        print ("El voltaje es: " + str(k) +"v")
+
+        d = array[2]
+        print ("La distancia es: " + str(d) + "cm")
+
+        array = [k,d]
+        print (array)
+
+        time.sleep(2.68)
+
+print ("Salimos!")
