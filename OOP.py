@@ -239,3 +239,91 @@ print(emp_1.email)
 del(emp_1.fullname)
 print(emp_1.fullname)
 '''
+
+# Python Tutorial: Decorators - Dynamically Alter The Functionality Of Your Functions
+# https://www.youtube.com/watch?v=FsAPt_9Bf3U
+
+from k_util import describe
+
+def outer_function(msg):
+    def inner_function():
+        print(msg)
+    return inner_function
+'''
+hi_func = outer_function('Hi')
+hello_func = outer_function('Hello')
+hi_func()
+hello_func()
+'''
+
+
+def decorator_function(original_function):
+    def wrapper_function(*args, **kwargs):
+        print('wrapper executed this before \'{}\''.format(original_function.__name__))
+        return original_function(*args, **kwargs)
+    return wrapper_function
+
+class decorator_class(object):
+    """docstring for decorator_class."""
+
+    def __init__(self, original_function):
+        super(decorator_class, self).__init__()
+        self.original_function = original_function
+
+    def __call__(self, *args, **kwargs):
+        print('class Method executed this before \'{}\''.format(self.original_function.__name__))
+        return self.original_function(*args, **kwargs)
+
+@decorator_function # OR @decorator_class
+def display():  # == display = decorator_function(display)
+    print('display Function')
+
+'''
+decorated_display = decorator_function(display)
+print('<BEGIN>')
+decorated_display()
+print('<END>')
+
+display()
+'''
+
+### DECORATOR EXAMPLE ###
+
+from functools import wraps
+
+def my_logger(original_function):
+    import logging
+    logging.basicConfig(filename='{}.log'.format(original_function.__name__),
+                        level=logging.INFO)
+
+    @wraps(original_function)
+    def logger_wrapper(*args, **kwargs):
+        logging.info(
+            'Ran with args: {}, and kwargs: {}'.format(args, kwargs))
+        return original_function(*args, **kwargs)
+
+    return logger_wrapper
+
+def my_timer(original_function):
+    import time
+
+    @wraps(original_function)
+    def timer_wrapper(*args, **kwargs):
+        t0 = time.time()
+        result = original_function(*args, **kwargs)
+        tf = time.time() - t0
+        print(f'{original_function.__name__} ran in: {tf} sec')
+        return result
+
+    return timer_wrapper
+
+import time
+
+
+@my_logger
+@my_timer
+def display_info(name, age):
+    time.sleep(1)
+    print(f'display_info ran with arguments ({name},{age})')
+
+display_info('juanito',3)
