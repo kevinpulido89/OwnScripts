@@ -10,6 +10,7 @@ class Student:
     def get_grade(self):
         return self.grade
 
+
 class Course(object):
     """docstring for Course."""
 
@@ -144,8 +145,9 @@ class Person(object):
             return 'Cae fin de semana'
         return 'Cae entre semana'
 
+
 p1 = Person('Tim', 20)
-p2 = Person('Kevin',31)
+p2 = Person('Kevin', 31)
 
 new_person = 'Sofi-14'
 p3 = Person.from_string(new_person)
