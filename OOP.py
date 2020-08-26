@@ -319,6 +319,7 @@ def my_timer(original_function):
 
     return timer_wrapper
 
+
 import time
 
 @my_logger
